@@ -1,2 +1,7 @@
 .idea/*
 src/tmp
+__pycache__/
+build/
+*egg-info/
+dist/
+

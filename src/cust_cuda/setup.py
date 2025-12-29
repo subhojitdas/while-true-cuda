@@ -6,10 +6,10 @@ setup(
     name="cust_add_ext",
     ext_modules=[
         CUDAExtension(
-            name="my_cuda_ext",
+            name="cust_add_ext",
             sources=[
                 "cust_add.cpp",
-                "cust_add.cu",
+                "cust_add_cuda.cu",
             ],
         )
     ],
