@@ -64,5 +64,87 @@ implicit synchronizations from later ops
 
 To measure kernel runtime you must synchronize.
 
+----
+### See the PTX from the .cu file directly
+
+Run the below , it will generate the ptx file.
+```
+export TORCH_INC=$(python -c 'import torch, os; print(os.path.join(os.path.dirname(torch.__file__), "include"))')
+export TORCH_API_INC=$(python -c 'import torch, os; print(os.path.join(os.path.dirname(torch.__file__), "include", "torch", "csrc", "api", "include"))')
+export PY_INC=$(python -c 'import sysconfig; print(sysconfig.get_paths()["include"])')
+
+nvcc -ptx cust_add_cuda.cu -o cust_add_cuda.ptx \
+  -I"$TORCH_INC" -I"$TORCH_API_INC" -I"$PY_INC" \
+  -I/usr/local/cuda/include \
+  -std=c++17
+```
+
+### See the PTX and SASS code from the .so generated after compilation
+
+Compiled .so file can be found in `/home/ubuntu/miniconda/envs/cuda_try/lib/python3.11/site-packages/cust_add_ext-0.0.0-py3.11-linux-x86_64.egg/cust_add_ext.cpython-311-x86_64-linux-gnu.so`
+
+```
+ELF .so
+ ├── host C++ code
+ ├── CUDA fatbinary
+ │    ├── SASS (sm_86)
+ │    └── PTX (compute_86)
+ └── symbols
+```
+
+If `.so` has the SASS code it will show something like this -
+```
+Fatbin elf code:
+================
+arch = sm_86 # Native SASS exists
+arch = compute_86 # PTX fallback
+```
+
+use `cuobjdump` ,
+```
+cuobjdump --dump-ptx cust_add_ext.cpython-311-x86_64-linux-gnu.so
+cuobjdump --dump-sass cust_add_ext.cpython-311-x86_64-linux-gnu.so > sass_lineinfo.txt
+```
+
+```
+head -n 35 sass.txt
+
+Fatbin elf code:
+================
+arch = sm_86
+code version = [1,7]
+host = linux
+compile_size = 64bit
+
+	code for sm_86
+		Function : _Z10add_kernelPKfPffi
+	.headerflags	@"EF_CUDA_TEXMODE_UNIFIED EF_CUDA_64BIT_ADDRESS EF_CUDA_SM86 EF_CUDA_VIRTUAL_SM(EF_CUDA_SM86)"
+        /*0000*/                   MOV R1, c[0x0][0x28] ;                        /* 0x00000a0000017a02 */
+                                                                                 /* 0x000fe40000000f00 */
+        /*0010*/                   S2R R4, SR_CTAID.X ;                          /* 0x0000000000047919 */
+                                                                                 /* 0x000e280000002500 */
+        /*0020*/                   S2R R3, SR_TID.X ;                            /* 0x0000000000037919 */
+                                                                                 /* 0x000e240000002100 */
+        /*0030*/                   IMAD R4, R4, c[0x0][0x0], R3 ;                /* 0x0000000004047a24 */
+                                                                                 /* 0x001fca00078e0203 */
+        /*0040*/                   ISETP.GE.AND P0, PT, R4, c[0x0][0x174], PT ;  /* 0x00005d0004007a0c */
+                                                                                 /* 0x000fda0003f06270 */
+        /*0050*/               @P0 EXIT ;                                        /* 0x000000000000094d */
+                                                                                 /* 0x000fea0003800000 */
+        /*0060*/                   MOV R5, 0x4 ;                                 /* 0x0000000400057802 */
+                                                                                 /* 0x000fe20000000f00 */
+        /*0070*/                   ULDC.64 UR4, c[0x0][0x118] ;                  /* 0x0000460000047ab9 */
+                                                                                 /* 0x000fc80000000a00 */
+        /*0080*/                   IMAD.WIDE R2, R4, R5, c[0x0][0x160] ;         /* 0x0000580004027625 */
+                                                                                 /* 0x000fcc00078e0205 */
+        /*0090*/                   LDG.E R2, [R2.64] ;                           /* 0x0000000402027981 */
+                                                                                 /* 0x000ea2000c1e1900 */
+        /*00a0*/                   IMAD.WIDE R4, R4, R5, c[0x0][0x168] ;         /* 0x00005a0004047625 */
+                                                                                 /* 0x000fe200078e0205 */
+        /*00b0*/                   FADD R7, R2, c[0x0][0x170] ;                  /* 0x00005c0002077621 */
+                                                                                 /* 0x004fca0000000000 */
+```
+
+
 
 
