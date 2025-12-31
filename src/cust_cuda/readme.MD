@@ -145,6 +145,31 @@ compile_size = 64bit
                                                                                  /* 0x004fca0000000000 */
 ```
 
+### Reading symbols table from the .so file symbols file:
 
+```
+> nm -D cust_add_ext.cpython-311-x86_64-linux-gnu.so > symbols.txt
 
+                 U PyGILState_GetThisThreadState
+                 U PyGILState_Release
+000000000004a990 T PyInit_cust_add_ext
+                 U PyInstanceMethod_New
+```
+
+- `T` meaning the method is defined in this .so
+- `U` meaning the symbols need to be loaded from a different `.so` file
+- 
+
+#### Symbol Table:
+
+```
+> readelf -s cust_add_ext.cpython-311-x86_64-linux-gnu.so
+
+  6299: 00000000000871ce   110 FUNC    WEAK   DEFAULT   16 _ZSt13__copy_mov[...]
+  6300: 00000000000666b6    31 FUNC    WEAK   DEFAULT   16 _ZNSt8__detail15[...]
+  6301: 00000000000849fc    55 FUNC    WEAK   DEFAULT   16 _ZNSt16_Sp_count[...]
+  6302: 000000000006cc76    98 FUNC    WEAK   DEFAULT   16 _ZNSt10unique_pt[...]
+  6303: 000000000006a8fa    90 FUNC    WEAK   DEFAULT   16 _ZNSt6vectorISt8[...]
+  6304: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND _ZTISt11range_er[...]
+```
 
