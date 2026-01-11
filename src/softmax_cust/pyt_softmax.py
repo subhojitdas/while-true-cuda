@@ -71,7 +71,7 @@ def softmax(x: torch.Tensor) -> torch.Tensor:
 
 
 # sample = torch.tensor([[-3.123e-6, -15.2, -15.8791, -24.123123, -31.12321], [5,4,3,2,1]], dtype=torch.float32, device="cuda")
-sample = torch.tensor([[1,2,3,4,5], [5,4,3,2,1]], dtype=torch.float32, device="cuda")
+sample = torch.tensor([[0.1, 0.9, 0.2, 0.2, 0.15], [5,4,3,2,1]], dtype=torch.float32, device="cuda")
 ref_out = F.softmax(sample, dim=1)
 print(ref_out)
 
